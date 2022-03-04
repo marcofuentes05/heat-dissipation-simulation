@@ -35,6 +35,17 @@ int main(int argc, char* argv[]) {
 	double t_l = 1;
 	double t_r = 50;
 	double dt = 0.005;
+
+	printf("Ingrese la precision: ");
+	scanf("%lf", &err);
+	printf("Ingrese el numero de intervalos discretos: ");
+	scanf("%d", &n);
+	printf("Ingrese la temperatura inicial de toda la barra: ");
+	scanf("%lf", &t_0);
+	printf("Ingrese la temperatura en la frontera inzquierda: ");
+	scanf("%lf", &t_l);
+	printf("Ingrese la temperatura en la frontera derecha: ");
+	scanf("%lf", &t_r);
 	// División del dominio en intervalos discretos
 	double dx = length / n;
 	double previousTemperature[n];
