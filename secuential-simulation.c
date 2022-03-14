@@ -16,11 +16,12 @@
 #define DX 0.05
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 // function to print in console the array
-void printArray(double array[]) {
+void printArray(double array[], int length) {
 	printf("{");
-	for (int i = 0 ; i < N; i++) {
+	for (int i = 0 ; i < length; i++) {
 		printf("%f, ", array[i]);		
 	}
 	printf("}\n");
@@ -35,6 +36,9 @@ int main(int argc, char* argv[]) {
 	double t_l = 1;
 	double t_r = 50;
 	double dt = 0.005;
+	double total_time = 500;
+
+    clock_t c_clock;
 
 	printf("Ingrese la precision: ");
 	scanf("%lf", &err);
@@ -46,6 +50,8 @@ int main(int argc, char* argv[]) {
 	scanf("%lf", &t_l);
 	printf("Ingrese la temperatura en la frontera derecha: ");
 	scanf("%lf", &t_r);
+    printf("Ingrese el tiempo total en segundos: ");
+	scanf("%lf", &total_time);
 	// División del dominio en intervalos discretos
 	double dx = length / n;
 	double previousTemperature[n];
@@ -60,10 +66,10 @@ int main(int argc, char* argv[]) {
 	newTemperature[0] = t_l;
 	previousTemperature[n-1] = t_r;
 	newTemperature[n-1] = t_r;
-	double time = 500;
 	double currentDt = 0;
-
-	while(currentDt < time) {
+    dt = err * dx * dx / C;
+    c_clock = clock();
+	while(currentDt < total_time) {
 			for (int j = 1; j<n-1; j++) {
 				// Calcular la nueva temperatura Tj(ti+1)
 				newTemperature[j]=	previousTemperature[j] + C * (dt / (dx * dx)) * (previousTemperature[j-1] - 2 * previousTemperature[j] + previousTemperature[j+1]); 
@@ -73,9 +79,12 @@ int main(int argc, char* argv[]) {
 				previousTemperature[j] = newTemperature[j];
 			}
 		currentDt += dt;
-		// Time 
-		printf("Time: %f\t", currentDt);
-		// Vector solución con las temperaturas de la barra
-		printArray(newTemperature);
 	}
+    c_clock = clock() - c_clock;
+    printf("While loop time ellapsed: %f\n", ((float)c_clock)/CLOCKS_PER_SEC);
+    printf("dt=%f\n", dt);
+		// Time 
+		// Vector solución con las temperaturas de la barra
+    printf("Time: %f\t", currentDt);
+    printArray(newTemperature, n);
 }
