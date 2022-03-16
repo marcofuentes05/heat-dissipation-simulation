@@ -10,7 +10,7 @@
 #define T_0 21		// Temperatura inicial de la barra
 #define T_L 21		// Temperatura inicil en x=0
 #define T_R 30		// Temperatura inical en x=L
-#define L 5			// Length of the bar
+#define L 50			// Length of the bar
 #define C 10e-5		// Thermal Diffusivity of the Material
 #define DT 0.5 
 #define DX 0.05
@@ -19,7 +19,7 @@
 #include <time.h>
 
 // function to print in console the array
-void printArray(double array[], int length) {
+void printArray(long double array[], int length) {
 	printf("{");
 	for (int i = 0 ; i < length; i++) {
 		printf("%f, ", array[i]);		
@@ -29,19 +29,17 @@ void printArray(double array[], int length) {
 
 // main function
 int main(int argc, char* argv[]) {
-	double err = ERR;
-	int n = N;
+    // Default Values
+	int n = 80000;
 	double length = L;
-	double t_0 = 21;
-	double t_l = 1;
-	double t_r = 50;
+	double t_0 = 20;
+	double t_l = 10;
+	double t_r = 30;
 	double dt = 0.005;
-	double total_time = 500;
+	double total_time = 10;
 
     clock_t c_clock;
 
-	printf("Ingrese la precision: ");
-	scanf("%lf", &err);
 	printf("Ingrese el numero de intervalos discretos: ");
 	scanf("%d", &n);
 	printf("Ingrese la temperatura inicial de toda la barra: ");
@@ -54,8 +52,8 @@ int main(int argc, char* argv[]) {
 	scanf("%lf", &total_time);
 	// División del dominio en intervalos discretos
 	double dx = length / n;
-	double previousTemperature[n];
-	double newTemperature[n];
+	long double previousTemperature[n];
+	long double newTemperature[n];
 	// Ajustar los valores iniciales de los vectores de solución Ti y Ti+1, para tiempo i
 	for(int i =0; i<n; i++) {
 		// Inicializamos el vector de temperaturas
@@ -67,7 +65,7 @@ int main(int argc, char* argv[]) {
 	previousTemperature[n-1] = t_r;
 	newTemperature[n-1] = t_r;
 	double currentDt = 0;
-    dt = err * dx * dx / C;
+    dt = 0.000125;
     c_clock = clock();
 	while(currentDt < total_time) {
 			for (int j = 1; j<n-1; j++) {
@@ -81,10 +79,10 @@ int main(int argc, char* argv[]) {
 		currentDt += dt;
 	}
     c_clock = clock() - c_clock;
+    // Vector solución con las temperaturas de la barra
+    printf("CFL Stability Condition: %f\n", dt * C / (dx * dx));
+    printf("SECUENTIAL VERSION\n");
+    printf("DISCRETE_STEPS: %d\n", n);
+    printf("BAR STATE: { %d, %d, %d, ... %d, %d, %d, ... %d, %d, %d }\n", (int)newTemperature[0], (int)newTemperature[1], (int)newTemperature[2], (int)newTemperature[n/2-1], (int)newTemperature[n/2], (int)newTemperature[n/2+1], (int)newTemperature[n-3], (int)newTemperature[n-2], (int)newTemperature[n-1]);
     printf("While loop time ellapsed: %f\n", ((float)c_clock)/CLOCKS_PER_SEC);
-    printf("dt=%f\n", dt);
-		// Time 
-		// Vector solución con las temperaturas de la barra
-    printf("Time: %f\t", currentDt);
-    printArray(newTemperature, n);
 }
