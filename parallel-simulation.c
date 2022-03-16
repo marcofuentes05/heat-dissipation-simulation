@@ -85,32 +85,12 @@ int main(int argc, char* argv[]) {
     dt = 0.000125;
     double t_initial = omp_get_wtime();
 	while(currentDt < total_time) {
-        // Primer intento de paralelismo
-        // #pragma omp parallel for num_threads(NUM_THREADS) shared(previousTemperature)
-        // for (int i = 1 ; i < n-1 ; i++) {
-        //     // newTemperature[i] = getNewTemperature(C, dt, dx, previousTemperature[i], previousTemperature[i-1], previousTemperature[i+1]);
-        //     newTemperature[i]=	previousTemperature[i] + C * (dt / (dx * dx)) * (previousTemperature[i-1] - 2 * previousTemperature[i] + previousTemperature[i+1]); 
-        // }
-
         #pragma omp parallel num_threads(NUM_THREADS)
         {
             int offset = omp_get_thread_num() * (n / NUM_THREADS);
-            // printf("{%d}\tOFFSET: %d\n", omp_get_thread_num(), offset);
             int returnSize = (int)((double)n/(double)NUM_THREADS);
-            // printf("{%d}\tRETURNSIZE: %d\n", omp_get_thread_num(), returnSize);
             getLocalTemperature(previousTemperature, n, dt, dx, offset, returnSize , newTemperature);
-                // #pragma omp task
-                // {
-                //     getLocalTemperature(previousTemperature, n, dt, dx, 0, n/2, newTemperature);
-                // }
-                // #pragma omp task
-                // {
-                //     getLocalTemperature(previousTemperature, n, dt, dx, n/2, n/2, newTemperature);
-                // }
         }
-        // printf("Exit all threads\n");
-        // exit(1);
-
         for (int j = 0 ; j < n; j++) {
             // Actualizar el vector de solución Ti+1
             previousTemperature[j] = newTemperature[j];
@@ -119,7 +99,6 @@ int main(int argc, char* argv[]) {
 	}
     double t_final = omp_get_wtime();
     printf("dt=%f\n", dt);
-    // printArray(newTemperature, n);
     printf("CFL Stability Condition: %f\n", dt * C / (dx * dx));
     printf("NUM_THREADS: %d\n", NUM_THREADS);
     printf("DISCRETE_STEPS: %d\n", n);
