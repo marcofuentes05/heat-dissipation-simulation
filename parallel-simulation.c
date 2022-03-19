@@ -5,16 +5,16 @@
  * en una barra metalica unidimensional de longitud L y c=10e-5
  */
 
-#define ERR 0.05	// Precision requerida
-#define N  10		// # de intervalos discretos
-#define T_0 21		// Temperatura inicial de la barra
-#define T_L 21		// Temperatura inicil en x=0
-#define T_R 30		// Temperatura inical en x=L
+#define ERR 0.05	    // Precision requerida
+#define N  10		    // # de intervalos discretos
+#define T_0 21		    // Temperatura inicial de la barra
+#define T_L 21		    // Temperatura inicil en x=0
+#define T_R 30		    // Temperatura inical en x=L
 #define L 50			// Length of the bar
-#define C 10e-5		// Thermal Diffusivity of the Material
+#define C 10e-5		    // Thermal Diffusivity of the Material
 #define DT 0.5 
 #define DX 0.05
-#define NUM_THREADS 32 //Num. of threads in use
+#define NUM_THREADS 8   //Num. of threads in use
 #include <stdio.h> 
 #include <string.h>
 #include <time.h>
@@ -30,21 +30,6 @@ void printArray(long double array[], int length) {
 	printf("}\n");
 }
 
-double getNewTemperature(double c, double dt, double dx, double pj, double pj_1, double pj__1){
-		return pj + c * (dt / (dx * dx)) * (pj_1 - 2 * pj + pj__1); 
-}
-
-void getLocalTemperature(long double* previousFragment, int previousFragmentSize, double dt, double dx, int offset, int returnSize, long double* newTemperature) {
-    #pragma omp parallel for schedule(static) num_threads(8)
-    for(int i = offset; i < returnSize+offset; i++) {
-        if (i==0 || i == previousFragmentSize-1) {
-            newTemperature[i] = previousFragment[i];
-        } else {
-		    newTemperature[i] = getNewTemperature(C, dt, dx, previousFragment[i], previousFragment[i-1], previousFragment[i+1]);
-        }
-	}
-}
-
 // main function
 int main(int argc, char* argv[]) {
     // Default Values
@@ -52,9 +37,9 @@ int main(int argc, char* argv[]) {
 	double length = L;
 	double t_0 = 20;
 	double t_l = 10;
-	double t_r = 30;
+	double t_r = 80;
 	double dt = 0.005;
-	double total_time = 10;
+	double total_time = 50;
 
 	printf("Ingrese el numero de intervalos discretos: ");
 	scanf("%d", &n);
@@ -69,6 +54,7 @@ int main(int argc, char* argv[]) {
 	// División del dominio en intervalos discretos
     printf("Starting execution\n");
 	double dx = length / n;
+    double * prviousTemperature;
 	long double previousTemperature[n];
 	long double newTemperature[n];
 	// Ajustar los valores iniciales de los vectores de solución Ti y Ti+1, para tiempo i
@@ -81,27 +67,33 @@ int main(int argc, char* argv[]) {
 	newTemperature[0] = t_l;
 	previousTemperature[n-1] = t_r;
 	newTemperature[n-1] = t_r;
-	double currentDt = 0;
-    dt = 0.000125;
+    dt = 0.00125;
+	double currentDt = total_time / dt;
+    printf("currentDT: %f\n", currentDt);
     double t_initial = omp_get_wtime();
-	while(currentDt < total_time) {
-        #pragma omp parallel num_threads(NUM_THREADS)
+    long double *previousTemperaturePointer;
+    long double *newTemperaturePointer;
+    previousTemperaturePointer = previousTemperature;
+    newTemperaturePointer = newTemperature;
+    #pragma omp parallel num_threads(8) firstprivate(currentDt)
+	while(currentDt--) {
+        #pragma omp for schedule(static , 1000)
+        for(int i = 1; i < n-1; i++) {
+            newTemperaturePointer[i] = previousTemperaturePointer[i] + C * (dt / (dx * dx)) * (previousTemperaturePointer[i-1] - 2 * previousTemperaturePointer[i] + previousTemperaturePointer[i+1]);
+        }
+        #pragma omp single 
         {
-            int offset = omp_get_thread_num() * (n / NUM_THREADS);
-            int returnSize = (int)((double)n/(double)NUM_THREADS);
-            getLocalTemperature(previousTemperature, n, dt, dx, offset, returnSize , newTemperature);
+            long double *temporalTemperature;
+            temporalTemperature = previousTemperaturePointer;
+            previousTemperaturePointer = newTemperaturePointer;
+            newTemperaturePointer = temporalTemperature;
         }
-        for (int j = 0 ; j < n; j++) {
-            // Actualizar el vector de solución Ti+1
-            previousTemperature[j] = newTemperature[j];
-        }
-		currentDt += dt;
 	}
     double t_final = omp_get_wtime();
     printf("dt=%f\n", dt);
     printf("CFL Stability Condition: %f\n", dt * C / (dx * dx));
     printf("NUM_THREADS: %d\n", NUM_THREADS);
     printf("DISCRETE_STEPS: %d\n", n);
-    printf("BAR STATE: { %d, %d, %d, ... %d, %d, %d, ... %d, %d, %d }\n", (int)previousTemperature[0], (int)previousTemperature[1], (int)previousTemperature[2], (int)previousTemperature[n/2-1], (int)previousTemperature[n/2], (int)previousTemperature[n/2+1], (int)previousTemperature[n-3], (int)previousTemperature[n-2], (int)previousTemperature[n-1]);
+    printf("BAR STATE: { %0.2f, %0.2f, %0.2f, ... %0.2f, %0.2f, %0.2f, ... %0.2f, %0.2f, %0.2f }\n", newTemperaturePointer[0], newTemperaturePointer[1], newTemperaturePointer[2], previousTemperature[n/2-1], previousTemperature[n/2], previousTemperature[n/2+1], previousTemperature[n-3], previousTemperature[n-2], previousTemperature[n-1]);
     printf("While loop time ellapsed: %f\n", t_final - t_initial);
 }
