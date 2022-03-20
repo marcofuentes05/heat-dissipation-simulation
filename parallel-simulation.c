@@ -96,6 +96,6 @@ int main(int argc, char* argv[]) {
     printf("CFL Stability Condition: %f\n", dt * C / (dx * dx));
     printf("NUM_THREADS: %d\n", NUM_THREADS);
     printf("DISCRETE_STEPS: %d\n", n);
-    printf("BAR STATE: { %0.2f, %0.2f, %0.2f, ... %0.2f, %0.2f, %0.2f, ... %0.2f, %0.2f, %0.2f }\n", newTemperaturePointer[0], newTemperaturePointer[1], newTemperaturePointer[2], previousTemperature[n/2-1], previousTemperature[n/2], previousTemperature[n/2+1], previousTemperature[n-3], previousTemperature[n-2], previousTemperature[n-1]);
+    printf("BAR STATE: { %0.2Lf, %0.2Lf, %0.2Lf, ... %0.2Lf, %0.2Lf, %0.2Lf, ... %0.2Lf, %0.2Lf, %0.2Lf }\n", newTemperaturePointer[0], newTemperaturePointer[1], newTemperaturePointer[2], previousTemperature[n/2-1], previousTemperature[n/2], previousTemperature[n/2+1], previousTemperature[n-3], previousTemperature[n-2], previousTemperature[n-1]);
     printf("While loop time ellapsed: %f\n", t_final - t_initial);
 }
