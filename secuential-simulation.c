@@ -34,22 +34,22 @@ int main(int argc, char* argv[]) {
 	double length = L;
 	double t_0 = 20;
 	double t_l = 10;
-	double t_r = 30;
+	double t_r = 80;
 	double dt = 0.005;
 	double total_time = 10;
 
     clock_t c_clock;
 
-	printf("Ingrese el numero de intervalos discretos: ");
-	scanf("%d", &n);
-	printf("Ingrese la temperatura inicial de toda la barra: ");
-	scanf("%lf", &t_0);
-	printf("Ingrese la temperatura en la frontera inzquierda: ");
-	scanf("%lf", &t_l);
-	printf("Ingrese la temperatura en la frontera derecha: ");
-	scanf("%lf", &t_r);
-    printf("Ingrese el tiempo total en segundos: ");
-	scanf("%lf", &total_time);
+	// printf("Ingrese el numero de intervalos discretos: ");
+	// scanf("%d", &n);
+	// printf("Ingrese la temperatura inicial de toda la barra: ");
+	// scanf("%lf", &t_0);
+	// printf("Ingrese la temperatura en la frontera inzquierda: ");
+	// scanf("%lf", &t_l);
+	// printf("Ingrese la temperatura en la frontera derecha: ");
+	// scanf("%lf", &t_r);
+    // printf("Ingrese el tiempo total en segundos: ");
+	// scanf("%lf", &total_time);
 	// División del dominio en intervalos discretos
 	double dx = length / n;
 	long double previousTemperature[n];
